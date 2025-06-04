@@ -1,17 +1,23 @@
-streamlit==1.39.0
+#streamlit==1.39.0
 langchain==0.3.1
 PyPDF2==3.0.1
-# openai==1.51.1
+# openai==1.51.1 # This line was commented out, consider removing if not needed
 sqlalchemy==2.0.35
-bcrypt==4.2.0
+# bcrypt==4.2.0 # Consider removing this if passlib[bcrypt] handles it
 streamlit_chat==0.1.1
 langchain-community==0.3.1
 langchain-openai==0.2.6
-faiss-cpu==1.9.0
+#faiss-cpu==1.11.0
 requests==2.32.3
-fastapi==0.115.2
 pydantic==2.9.2
-qdrant-client==1.13.2
+pydantic-settings # Add this line
+qdrant-client==1.12.0 # Changed from 1.13.2
 boto3==1.37.5
 # Correct version ranges to avoid conflicts
 openai>=1.54.0,<2.0.0
+fastapi
+uvicorn
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+email-validator
