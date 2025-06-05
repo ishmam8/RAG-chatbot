@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Tuple, Any
 
 
 # ----- Data returned when a user is created or fetched -----
@@ -44,25 +44,15 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
-# # ----- Chat / Document schemas (unchanged from before) -----
+class FileUploadResponse(BaseModel):
+    detail: str
 
-# class Message(BaseModel):
-#     role: str  # "user" or "assistant"
-#     content: str
+class ChatQuery(BaseModel):
+    question: str
+    history: List[Tuple[str, str]]  # e.g. [("Hello", "Hi! How can I help?"), ...]
+    top_k: int = 4  # how many docs to retrieve
 
-
-# class ChatRequest(BaseModel):
-#     message: str
-#     history: Optional[List[Message]] = None
-
-
-# class ChatResponse(BaseModel):
-#     answer: str
-#     sources: Optional[List[str]] = None
-
-
-# class DocumentUploadResponse(BaseModel):
-#     success: bool
-#     document_id: Optional[str] = None
-#     chunks_indexed: Optional[int] = None
-#     error: Optional[str] = None
+class ChatResponse(BaseModel):
+    answer: str
+    sources: List[str]           # e.g. ["[File: xyz.pdf, Page 3]", …]
+    updated_history: List[Tuple[str, str]]

@@ -24,7 +24,7 @@ app.add_middleware(
 # ----------- Include Routers -----------
 app.include_router(auth_router.router, prefix="/auth")
 # app.include_router(chat_router.router, prefix="/chat")
-# app.include_router(docs_router.router, prefix="/documents")
+app.include_router(docs_router.router, prefix="/documents")
 
 
 # ----------- Startup Event: initialize the database & any heavy models -----------

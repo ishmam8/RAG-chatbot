@@ -1,5 +1,7 @@
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 from typing import Optional
+import os
 
 class Settings(BaseSettings):
     # ============ JWT Settings ============
@@ -8,20 +10,32 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60  # 1 hour
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7  # 30 days
 
-    # ============ Database Settings ============
     # Using SQLite file-based DB in the project root.
     SQLALCHEMY_DATABASE_URL: str = "sqlite:///./users.db"
 
-    # ============ External API Settings (Add these) ============
-    QDRANT_API_KEY: Optional[str] = None # Or str if it's always required
-    QDRANT_CLIENT_URL: Optional[str] = None # Or str if it's always required
-    OPENAI_API_KEY: Optional[str] = None # Or str if it's always required
 
-    # openai_api_key = Optional[str] = None
+    OPENAI_API_KEY: str     = os.getenv("OPENAI_API_KEY")
+    # QDRANT_URL: str       = os.getenv("QDRANT_URL")
+    # QDRANT_API_KEY: str   = os.getenv("QDRANT_API_KEY")
+    # BUCKET_NAME: str      = os.getenv("BUCKET_NAME", "smart-buildr-s3")
+    
+    AWS_ACCESS_KEY_ID: str       = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY: str   = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_REGION: str              = os.getenv("AWS_REGION")
+    S3_BUCKET_NAME : str         = os.getenv("S3_BUCKET_NAME")
 
-
-    class Config:
-        env_file = ".env"  # you can override any of the above via a .env file
+    FAISS_BASE_PATH: str   = os.getenv("FAISS_BASE_PATH", "faiss_db")
+    FAISS_PDF_PATH: str    = os.path.join(FAISS_BASE_PATH, "pdf_index")
+    FAISS_CSV_PATH: str    = os.path.join(FAISS_BASE_PATH, "csv_index")
+    
+    # Vector store collection names
+    PDF_COLLECTION: str   = "buildsmart-pdf-collection"
+    CSV_COLLECTION: str   = "buildsmart-csv-collection"
+    
+    model_config = ConfigDict(
+        extra="ignore",
+        env_file=".env"  # Moved env_file here
+    )
 
 
 settings = Settings()
