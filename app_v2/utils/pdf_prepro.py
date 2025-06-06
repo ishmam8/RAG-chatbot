@@ -5,7 +5,6 @@ from langchain_community.vectorstores import FAISS
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from typing import List, Tuple
-from langchain.vectorstores import FAISS
 # from langchain.embeddings import Embeddings
 from langchain.docstore.document import Document
 ######  PDF file preprocessing ##########

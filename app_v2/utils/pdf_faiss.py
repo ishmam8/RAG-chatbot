@@ -61,25 +61,25 @@ def handle_pdf_3(file_bytes: Union[bytes, io.BytesIO], file_name: str) -> dict:
         docs.append(Document(page_content=page_text, metadata=meta))
 
     # 4) Ensure FAISS folder exists
-    faiss_folder = settings.FAISS_PDF_PATH
+    pdf_key = os.path.splitext(file_name)[0]
+    faiss_folder = os.path.join(settings.FAISS_PDF_PATH, pdf_key)
     os.makedirs(faiss_folder, exist_ok=True)
 
     # 5) Load existing FAISS or create a new one
     try:
-        faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=_embeddings_model)
-        logger.info(f"[handle_pdf_3] Loaded existing FAISS index from {faiss_folder}")
+        faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=_embeddings_model,
+                                       allow_dangerous_deserialization=True)
+        logger.info(f"Loaded existing FAISS at {faiss_folder}")
+        faiss_index.add_documents(docs)
+        logger.info(f"Appended {len(docs)} chunks to FAISS at {faiss_folder}")
     except Exception:
         # No existing index on disk → create a new one
         faiss_index = FAISS.from_documents(docs, _embeddings_model)
-        logger.info(f"[handle_pdf_3] Created new FAISS index with {len(docs)} chunks")
+        logger.info(f"Created new FAISS index with {len(docs)} chunks")
         faiss_index.save_local(faiss_folder)
         return {"ingested_count": len(docs)}
 
-    # 6) Add new documents to the loaded index
-    faiss_index.add_documents(docs)
-    logger.info(f"[handle_pdf_3] Added {len(docs)} new chunks to FAISS index at {faiss_folder}")
-
-    # 7) Save index back to disk
+    # 6) Save index back to disk
     faiss_index.save_local(faiss_folder)
 
     return {"ingested_count": len(docs)}
