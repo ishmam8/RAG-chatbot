@@ -11,24 +11,36 @@ from langchain_community.vectorstores import FAISS
 
 from app_v2.config import settings
 from app_v2.core.model_management import get_embeddings_model
+from app_v2.services import get_project_info
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-#TODO: with depends get the embeddings model 
 
 def csv_faiss_hybrid_retriever(data, column_contents, project_id, file_name):
+    project_name, project_intro = get_project_info(project_id)
+    
+    # Add project details to rows
+    for doc in data:
+        doc.metadata["project_name"] = project_name
+        doc.metadata["project_intro"] = project_intro
+        doc.metadata["file_name"] = file_name
+        doc.metadata["type"] = "row"
+        
     # Ensure FAISS folder exists
     faiss_folder = os.path.join(settings.FAISS_PDF_PATH, project_id)
     os.makedirs(faiss_folder, exist_ok=True)
 
     docs = list(data)
     for col, text in column_contents.items():
-        docs.append(Document(page_content=text, metadata={"column": col, "file_name": file_name, "type": "column"}))
+        docs.append(Document(page_content=text, metadata={"column": col, "project_name": project_name, 
+                                                          "project_intro": project_intro,
+                                                          "file_name": file_name, "type": "column"}))
 
     # Load or create FAISS index
     try:
-        faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=get_embeddings_model(), allow_dangerous_deserialization=True)
+        faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=get_embeddings_model(), 
+                                       allow_dangerous_deserialization=True)
         logger.info(f"[handle_csv] Loaded existing FAISS index from {faiss_folder}")
 
         # Duplicate check: skip if file_name already exists
