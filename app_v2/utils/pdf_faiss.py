@@ -10,14 +10,9 @@ from langchain_community.vectorstores import FAISS
 
 from app_v2.config import settings
 from app_v2.utils.pdf_prepro import pdf_read_2, get_chunks
+from app_v2.core.model_management import get_embeddings_model
 
 logger = logging.getLogger(__name__)
-
-# Instantiate the embedding model once
-_embeddings_model = OpenAIEmbeddings(
-    model="text-embedding-3-large",
-    openai_api_key=settings.OPENAI_API_KEY
-)
 
 
 def handle_pdf(project_id, file_bytes: Union[bytes, io.BytesIO], file_name: str) -> dict:
@@ -66,14 +61,14 @@ def handle_pdf(project_id, file_bytes: Union[bytes, io.BytesIO], file_name: str)
 
     #Load existing FAISS or create a new one
     try:
-        faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=_embeddings_model,
+        faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=get_embeddings_model(),
                                        allow_dangerous_deserialization=True)
         logger.info(f"Loaded existing FAISS at {faiss_folder}")
         faiss_index.add_documents(docs)
         logger.info(f"Appended {len(docs)} chunks to FAISS at {faiss_folder}")
     except Exception:
         # No existing index on disk → create a new one
-        faiss_index = FAISS.from_documents(docs, _embeddings_model)
+        faiss_index = FAISS.from_documents(docs, get_embeddings_model())
         logger.info(f"Created new FAISS index with {len(docs)} chunks")
         faiss_index.save_local(faiss_folder)
         return {"ingested_count": len(docs)}

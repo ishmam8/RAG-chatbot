@@ -1,27 +1,21 @@
-import io
 import logging
 import os
-import uuid
 import tempfile
-import glob
 from typing import Union
+from fastapi import Depends
 
-import pandas as pd
 from langchain.docstore.document import Document
 from langchain_community.document_loaders import CSVLoader
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
 from app_v2.config import settings
+from app_v2.core.model_management import get_embeddings_model
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Instantiate the embedding model once
-_embeddings_model = OpenAIEmbeddings(
-    model="text-embedding-3-large",
-    openai_api_key=settings.OPENAI_API_KEY
-)
-
+#TODO: with depends get the embeddings model 
 
 def csv_faiss_hybrid_retriever(data, column_contents, project_id, file_name):
     # Ensure FAISS folder exists
@@ -34,8 +28,7 @@ def csv_faiss_hybrid_retriever(data, column_contents, project_id, file_name):
 
     # Load or create FAISS index
     try:
-        logger.info(f"Files in FAISS folder: {glob.glob(os.path.join(faiss_folder, '*'))}")
-        faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=_embeddings_model, allow_dangerous_deserialization=True)
+        faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=get_embeddings_model(), allow_dangerous_deserialization=True)
         logger.info(f"[handle_csv] Loaded existing FAISS index from {faiss_folder}")
 
         # Duplicate check: skip if file_name already exists
@@ -49,7 +42,7 @@ def csv_faiss_hybrid_retriever(data, column_contents, project_id, file_name):
 
     except Exception as e:
         logger.warning(f"[handle_csv] Failed to load existing FAISS: {e}")
-        faiss_index = FAISS.from_documents(docs, _embeddings_model)
+        faiss_index = FAISS.from_documents(docs, get_embeddings_model())
         logger.info(f"[handle_csv] Created new FAISS index with {len(docs)} rows")
         logger.info(f"[handle_csv] Saving new FAISS index to {faiss_folder} {file_name}")
         faiss_index.save_local(faiss_folder)
