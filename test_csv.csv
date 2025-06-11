@@ -1,0 +1,63 @@
+Question,Answers,Page,File,Section
+What is the civic address,"378 STEVENS DRIVE , WEST VANCOUVER",1,Architectural Plan,Q2
+What is the site address,"378 STEVENS DRIVE , WEST VANCOUVER",1,Architectural Plan,Q2
+client,HARJIT PUREWAL,1,Architectural Plan,Q2
+legal description,"LOT 52 BLOCK 6 CAPILANO ESTATES , PLAN 6728 PID: 010-818-316",1,Architectural Plan,Q2
+what is the zone,RS3,1,Architectural Plan,Q2
+What is the lot area,22458.47 SF (2086.46 SM),1,Architectural Plan,Q2
+permitted site coverage,30% of the lot area,1,Architectural Plan,Q2
+proposed area,29% of the lot area,1,Architectural Plan,Q2
+house area,6153.98 SF,1,Architectural Plan,Q2
+pool area,350.00 SF,1,Architectural Plan,Q2
+maximum floor area permitted,7860.46 SF (730.26 SM),1,Architectural Plan,Q2
+proposed floor area,7856.98 SF (729.94 SM),1,Architectural Plan,Q2
+UPPER FLOOR AREA NET,2267.44 SF (210.65 SM),1,Architectural Plan,Q2
+Open To Below (OTB) AREA ,276.17 SF (25.66 SM),1,Architectural Plan,Q2
+MAIN FLOOR AREA NET,3350.58 SF (311.28 SM),1,Architectural Plan,Q2
+EXCESS GARAGE AREA,272.68 SF (25.33 SM),1,Architectural Plan,Q2
+BASEMENT AREA,1690.11 SF (157.02 SM),1,Architectural Plan,Q2
+Front Yard Building Setback,"min. 9.10m, actual 9.10m",1,Architectural Plan,Q2
+Rear Yard Building Setback,"min. 9.10m, actual 22.23m",1,Architectural Plan,Q2
+Right Yard Building Setback,"min. 3.00m, actual 3.00m",1,Architectural Plan,Q2
+Left Yard Building Setback,"min. 4.6m, actual 4.6m",1,Architectural Plan,Q2
+Scale of the plan,"1/8"" on this plan is 1'-0"" in real world",1,Architectural Plan,Q4
+Drawing Index,TBF by KP,1,Architectural Plan,Q4
+What STep code is this house?,3,1,Architectural Plan,Q4
+Show me a picture of the serbacks,,2,Architectural Plan,Q0
+What is the fron slab elevation?,139.11m,2,Architectural Plan,Q2
+Waht is the elevation of teh covered patio,139.24,2,Architectural Plan,Q1
+Sq Ft of swimming pool,200,2,Architectural Plan,Q1
+What is the elevation of Point A,140.46,3,Architectural Plan,Q2
+What is the elevation of Point B,140.44,3,Architectural Plan,Q2
+Which page is the traffice Management plan,SHeet Number 4,4,Architectural Plan,Q0
+What is the max height of the building,147.49m,5,Architectural Plan,Q1
+WHat is the upper floor elevation,142.69m,5,Architectural Plan,Q1
+Garage slab elevation,139.11m,5,Architectural Plan,Q1
+Main Floor elevatinon,139.31m,5,Architectural Plan,Q3
+How many skylights,7,7,Architectural Plan,Q0
+Overhang lenght,2',7,Architectural Plan,Q0
+How many bedrooms top floor,5,8,Architectural Plan,Q0
+Size of master bedroom,"16'6"" x 18' 0""",8,Architectural Plan,Q1
+How many bedrooms on the main floor,1,9,Architectural Plan,Q0
+How big is the living room,"20' x 17' 10""",9,Architectural Plan,Q3
+How many car garage,3,9,Architectural Plan,Q4
+Size of theater room,"16' x 26' 4""",10,Architectural Plan,Q4
+Height of basement floor,9',11,Architectural Plan,Q1
+Height of main floor,10',11,Architectural Plan,Q1
+Height of top floor,9',11,Architectural Plan,Q1
+Number of widnows,38,5-6,Architectural Plan,Q0
+,,,,
+What is the Snow load on the roof,61.0 PSF,1,Structural Plan,Q1
+What is Detail #8,Hold down connection to concrete or joist,2,Structural Plan,Q2
+Where is the Hold down detial/drawing/typical,Page 2 #8,2,Structural Plan,Q2
+Where is the rebar detail,Page 2 #33,2,Structural Plan,Q4
+How many horizotnal rows of rebar are there,15M @ 18 o.c so 6 rows since the height is 9',2,Structural Plan,Q4
+WHat is the thickness of the rebar,15m,2,Structural Plan,Q4
+What is the joist to concrete connection,Page 3 #27,3,Structural Plan,Q2
+WHat is J1,"1000 M 162-68 @ 16"" o.c Joist. This is a single joist that is 10"" in height and spaced at 16"" on center",4,Structural Plan,Q2
+WHat is B1,"2-1000M162-68 Joist. This is 2 10"" joists connected together to make Beam1",4,Structural Plan,Q2
+How many J1's are there,11,5,Structural Plan,Q0
+How many P1 are on the upper floor,22,6,Structural Plan,Q0
+How many Truss types are there,4,7,,Q0
+WHat is the longest span of a truss,40',7,,Q1
+WHat is R2?,"Roof truss RT2 that is max 23' 7"" in length and 1' 8"" in height",7,,Q1

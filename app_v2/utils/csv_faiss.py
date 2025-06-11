@@ -3,6 +3,7 @@ import logging
 import os
 import uuid
 import tempfile
+import glob
 from typing import Union
 
 import pandas as pd
@@ -12,7 +13,7 @@ from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
 from app_v2.config import settings
-
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Instantiate the embedding model once
@@ -33,7 +34,8 @@ def csv_faiss_hybrid_retriever(data, column_contents, project_id, file_name):
 
     # Load or create FAISS index
     try:
-        faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=_embeddings_model)
+        logger.info(f"Files in FAISS folder: {glob.glob(os.path.join(faiss_folder, '*'))}")
+        faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=_embeddings_model, allow_dangerous_deserialization=True)
         logger.info(f"[handle_csv] Loaded existing FAISS index from {faiss_folder}")
 
         # Duplicate check: skip if file_name already exists
@@ -45,9 +47,11 @@ def csv_faiss_hybrid_retriever(data, column_contents, project_id, file_name):
             logger.info(f"[handle_csv] File '{file_name}' already exists in FAISS index. Skipping insertion.")
             return {"ingested_count": 0}
 
-    except Exception:
+    except Exception as e:
+        logger.warning(f"[handle_csv] Failed to load existing FAISS: {e}")
         faiss_index = FAISS.from_documents(docs, _embeddings_model)
         logger.info(f"[handle_csv] Created new FAISS index with {len(docs)} rows")
+        logger.info(f"[handle_csv] Saving new FAISS index to {faiss_folder} {file_name}")
         faiss_index.save_local(faiss_folder)
         return {"ingested_count": len(docs)}
 
@@ -61,10 +65,11 @@ def csv_faiss_hybrid_retriever(data, column_contents, project_id, file_name):
 
 
 def handle_csv(project_id, uploaded_file, file_name=None):
-    raw_data = uploaded_file.getvalue() if hasattr(uploaded_file,"getvalue") else uploaded_file.file.read()
-    bio = io.BytesIO(raw_data)
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+        tmp_file.write(uploaded_file.file.read())
+        tmp_file_path = tmp_file.name
 
-    loader = CSVLoader(file_path=bio, encoding="utf-8", csv_args={'delimiter': ','})
+    loader = CSVLoader(file_path=tmp_file_path, encoding="utf-8", csv_args={'delimiter': ','})
     data = loader.load()
     if not data:
         logger.error("No data found in the CSV.")
@@ -77,5 +82,6 @@ def handle_csv(project_id, uploaded_file, file_name=None):
         column_contents.setdefault("content", []).append(doc.page_content)  # Store main text content
     column_contents = {col: " ".join(values) for col, values in column_contents.items()}
     
-    retriever = csv_faiss_hybrid_retriever(data, column_contents, project_id, uploaded_file.name)
+    retriever = csv_faiss_hybrid_retriever(data, column_contents, project_id, file_name)
     logger.info("CSV embedding saved into Vector Database successfully with retriever: %s", retriever)
+    return retriever
