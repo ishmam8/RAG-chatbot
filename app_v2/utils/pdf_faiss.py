@@ -20,7 +20,7 @@ _embeddings_model = OpenAIEmbeddings(
 )
 
 
-def handle_pdf_3(file_bytes: Union[bytes, io.BytesIO], file_name: str) -> dict:
+def handle_pdf(project_id, file_bytes: Union[bytes, io.BytesIO], file_name: str) -> dict:
     """
     1. Wrap raw bytes in BytesIO if needed.
     2. Extract text → chunk into overlapping Document objects with metadata (incl. page & file_name).
@@ -28,7 +28,7 @@ def handle_pdf_3(file_bytes: Union[bytes, io.BytesIO], file_name: str) -> dict:
     4. Add the new chunks/documents to that index and save it.
     Returns: { "ingested_count": <number_of_chunks> }.
     """
-    # 1) Wrap raw bytes in BytesIO
+    # Wrap raw bytes in BytesIO
     if isinstance(file_bytes, (bytes, bytearray)):
         pdf_stream = io.BytesIO(file_bytes)
     elif isinstance(file_bytes, io.BytesIO):
@@ -36,7 +36,7 @@ def handle_pdf_3(file_bytes: Union[bytes, io.BytesIO], file_name: str) -> dict:
     else:
         raise ValueError("handle_pdf_3 expects raw bytes or io.BytesIO")
 
-    # 2) Extract and chunk
+    # Extract and chunk
     try:
         raw_text_with_metadata = pdf_read_2(file_name, pdf_stream)
     except Exception as e:
@@ -52,7 +52,7 @@ def handle_pdf_3(file_bytes: Union[bytes, io.BytesIO], file_name: str) -> dict:
     if not text_chunks:
         raise ValueError("No chunks extracted from PDF")
 
-    # 3) Build LangChain Document objects with metadata
+    # Build LangChain Document objects with metadata
     docs = []
     for metadata, page_text in text_chunks:
         # chunk.metadata already contains page info (e.g. {"page": 3})
@@ -60,12 +60,11 @@ def handle_pdf_3(file_bytes: Union[bytes, io.BytesIO], file_name: str) -> dict:
         meta["file_name"] = file_name
         docs.append(Document(page_content=page_text, metadata=meta))
 
-    # 4) Ensure FAISS folder exists
-    pdf_key = os.path.splitext(file_name)[0]
-    faiss_folder = os.path.join(settings.FAISS_PDF_PATH, pdf_key)
+    #Ensure FAISS folder exists
+    faiss_folder = os.path.join(settings.FAISS_PDF_PATH, project_id)
     os.makedirs(faiss_folder, exist_ok=True)
 
-    # 5) Load existing FAISS or create a new one
+    #Load existing FAISS or create a new one
     try:
         faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=_embeddings_model,
                                        allow_dangerous_deserialization=True)
@@ -79,7 +78,5 @@ def handle_pdf_3(file_bytes: Union[bytes, io.BytesIO], file_name: str) -> dict:
         faiss_index.save_local(faiss_folder)
         return {"ingested_count": len(docs)}
 
-    # 6) Save index back to disk
     faiss_index.save_local(faiss_folder)
-
     return {"ingested_count": len(docs)}

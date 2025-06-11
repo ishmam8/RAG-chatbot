@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Form
 from botocore.exceptions import BotoCoreError
 import boto3
 
@@ -8,17 +8,21 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct
 
 from app_v2.config import settings
-from app_v2.utils.pdf_faiss import handle_pdf_3  # relative import from /app
-from app_v2.utils.csv_faiss import handle_csv_v2
+from app_v2.utils.pdf_faiss import handle_pdf  
+from app_v2.utils.csv_faiss import handle_csv
 from app_v2.core.auth import get_current_user
-from app_v2.schemas import FileUploadResponse  # relative import
+from app_v2.schemas import FileUploadResponse  
 
 router = APIRouter(tags=["documents"])
 
+#TODO:
+# Make this route admin only
 @router.post("/upload", response_model=FileUploadResponse)
-async def upload_document(file: UploadFile = File(...), current_user: str = Depends(get_current_user)):
+async def upload_document(
+    project_id: str = Form(..., description="ID of the project to ingest into"),
+    file: UploadFile = File(...), current_user: str = Depends(get_current_user)):
     """
-    Endpoint to upload a PDF or CSV, chunk/embed it, and store in Qdrant.
+    Endpoint to upload a PDF or CSV, chunk/embed it, and store in FAISS.
     """
     filename = file.filename.lower()
     if not (filename.endswith(".pdf") or filename.endswith(".csv")):
@@ -26,7 +30,6 @@ async def upload_document(file: UploadFile = File(...), current_user: str = Depe
 
     await file.seek(0)
     file_content_bytes = await file.read()
-
     #TODO:
     # 1) Upload to S3 (if desired—mirrors Streamlit’s behavior)
     # s3 = boto3.client(
@@ -46,8 +49,9 @@ async def upload_document(file: UploadFile = File(...), current_user: str = Depe
 
     # 3) Call the existing ingestion routines
     if filename.endswith(".pdf"):
-        handle_pdf_3(file_bytes=file_content_bytes, file_name=file.filename)   # Re‐uses your existing /app logic
+        result = handle_pdf(project_id, file_bytes=file_content_bytes, file_name=file.filename)
     else:
-        handle_csv_v2(file)  # Re‐uses existing CSV ingestion
+        result = handle_csv(project_id, file, file_name=file.filename)
 
-    return {"detail": f"File '{file.filename}' ingested successfully."}
+    return {"detail": f"'{file.filename}' ingested into project '{project_id}' ({result['ingested_count']} chunks).", 
+            "project_id": project_id}

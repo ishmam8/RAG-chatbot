@@ -101,13 +101,6 @@ def vector_store_txt(text_chunks, embeddings, db_path):
         new_store.save_local(db_path)
 
 
-# def get_chunks(text):
-#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-#     chunks = text_splitter.split_text(text)
-#     # print('chunks ....', chunks)
-#     return chunks
-
-
 # def vector_store_txt(text_chunks, embeddings, db_path):
 #     """
 #     Updates a vector store by removing old embedded files and adding new ones.

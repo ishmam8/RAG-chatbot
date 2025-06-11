@@ -2,10 +2,12 @@ import io
 import logging
 import os
 import uuid
+import tempfile
 from typing import Union
 
 import pandas as pd
 from langchain.docstore.document import Document
+from langchain_community.document_loaders import CSVLoader
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
@@ -20,62 +22,60 @@ _embeddings_model = OpenAIEmbeddings(
 )
 
 
-def handle_csv_v2(
-    file_bytes: Union[bytes, io.BytesIO],
-    file_name: str
-) -> dict:
-    """
-    1. Wrap raw bytes in BytesIO if needed.
-    2. Read CSV into DataFrame → build one Document per row, with metadata {"row_index": i, "file_name": file_name}.
-    3. Load or create a FAISS index at settings.FAISS_CSV_PATH.
-    4. Add these new row-documents → save index.
-    Returns: { "ingested_count": <number_of_rows> }.
-    """
-    # 1) Wrap bytes
-    if isinstance(file_bytes, (bytes, bytearray)):
-        csv_stream = io.BytesIO(file_bytes)
-    elif isinstance(file_bytes, io.BytesIO):
-        csv_stream = file_bytes
-    else:
-        raise ValueError("handle_csv_v2 expects raw bytes or io.BytesIO")
-
-    # 2) Load into DataFrame
-    try:
-        df = pd.read_csv(csv_stream)
-    except Exception as e:
-        logger.error(f"[handle_csv_v2] Failed to read CSV: {e}")
-        raise
-
-    if df.empty:
-        raise ValueError("CSV is empty or unreadable")
-
-    # 3) Build one Document per row
-    docs = []
-    for idx, row in df.iterrows():
-        # Concatenate all non-null values for embedding
-        row_text = " ".join(str(val) for val in row.values if pd.notna(val))
-        metadata = {"row_index": int(idx), "file_name": file_name}
-        docs.append(Document(page_content=row_text, metadata=metadata))
-
-    # 4) Ensure FAISS folder exists
-    faiss_folder = settings.FAISS_CSV_PATH
+def csv_faiss_hybrid_retriever(data, column_contents, project_id, file_name):
+    # Ensure FAISS folder exists
+    faiss_folder = os.path.join(settings.FAISS_PDF_PATH, project_id)
     os.makedirs(faiss_folder, exist_ok=True)
 
-    # 5) Load or create FAISS index
+    docs = list(data)
+    for col, text in column_contents.items():
+        docs.append(Document(page_content=text, metadata={"column": col, "file_name": file_name, "type": "column"}))
+
+    # Load or create FAISS index
     try:
         faiss_index = FAISS.load_local(folder_path=faiss_folder, embeddings=_embeddings_model)
-        logger.info(f"[handle_csv_v2] Loaded existing FAISS index from {faiss_folder}")
+        logger.info(f"[handle_csv] Loaded existing FAISS index from {faiss_folder}")
+
+        # Duplicate check: skip if file_name already exists
+        existing_file_names = set()
+        for doc in faiss_index.docstore._dict.values():
+            if hasattr(doc, "metadata") and "file_name" in doc.metadata:
+                existing_file_names.add(doc.metadata["file_name"])
+        if file_name in existing_file_names:
+            logger.info(f"[handle_csv] File '{file_name}' already exists in FAISS index. Skipping insertion.")
+            return {"ingested_count": 0}
+
     except Exception:
         faiss_index = FAISS.from_documents(docs, _embeddings_model)
-        logger.info(f"[handle_csv_v2] Created new FAISS index with {len(docs)} rows")
+        logger.info(f"[handle_csv] Created new FAISS index with {len(docs)} rows")
         faiss_index.save_local(faiss_folder)
         return {"ingested_count": len(docs)}
 
-    # 6) Add new documents
+    # Add new documents
     faiss_index.add_documents(docs)
-    logger.info(f"[handle_csv_v2] Added {len(docs)} new rows to FAISS index at {faiss_folder}")
+    logger.info(f"[handle_csv] Added {len(docs)} new docs (rows+columns) to FAISS index at {faiss_folder}")
 
-    # 7) Save index back to disk
+    # Save index back to disk
     faiss_index.save_local(faiss_folder)
-
     return {"ingested_count": len(docs)}
+
+
+def handle_csv(project_id, uploaded_file, file_name=None):
+    raw_data = uploaded_file.getvalue() if hasattr(uploaded_file,"getvalue") else uploaded_file.file.read()
+    bio = io.BytesIO(raw_data)
+
+    loader = CSVLoader(file_path=bio, encoding="utf-8", csv_args={'delimiter': ','})
+    data = loader.load()
+    if not data:
+        logger.error("No data found in the CSV.")
+        return
+
+    column_contents = {}
+    for doc in data:
+        for key, value in doc.metadata.items():  # Extract metadata fields
+            column_contents.setdefault(key, []).append(str(value))  # Ensure it's a string
+        column_contents.setdefault("content", []).append(doc.page_content)  # Store main text content
+    column_contents = {col: " ".join(values) for col, values in column_contents.items()}
+    
+    retriever = csv_faiss_hybrid_retriever(data, column_contents, project_id, uploaded_file.name)
+    logger.info("CSV embedding saved into Vector Database successfully with retriever: %s", retriever)

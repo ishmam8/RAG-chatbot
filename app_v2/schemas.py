@@ -46,6 +46,7 @@ class RefreshRequest(BaseModel):
 
 class FileUploadResponse(BaseModel):
     detail: str
+    project_id: str
 
 class ChatQuery(BaseModel):
     question: str
