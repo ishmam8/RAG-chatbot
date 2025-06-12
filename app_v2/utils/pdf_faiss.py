@@ -3,7 +3,6 @@ import logging
 import os
 import uuid
 from typing import Union
-from fastapi import HTTPException
 
 from langchain.docstore.document import Document
 from langchain_community.embeddings import OpenAIEmbeddings

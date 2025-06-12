@@ -39,19 +39,22 @@ class Settings(BaseSettings):
     PROJECTS: dict = {
         "project_id_1": {
             "name": "Project One",
-            "intro": "This is the introduction for Project One."
+            "intro": "Location: 378 Stevens Drive"
         },
         "project_id_2": {
             "name": "Project Two",
-            "intro": "This is the introduction for Project Two."
+            "intro": "Location: 10811 164th St Surrey"
         },
-        # Add more projects as needed
+        "project_id_3": {
+            "name": "Project Three",
+            "intro": "Location: 9845 182a St"
+        },
     }
 
     
     model_config = ConfigDict(
         extra="ignore",
-        env_file=".env"  # Moved env_file here
+        env_file=".env"
     )
 
 

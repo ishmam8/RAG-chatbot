@@ -2,7 +2,6 @@ import logging
 import os
 import tempfile
 from typing import Union
-from fastapi import Depends
 
 from langchain.docstore.document import Document
 from langchain_community.document_loaders import CSVLoader

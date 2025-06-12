@@ -19,21 +19,13 @@ from langchain.docstore.document import Document
 
 router = APIRouter(tags=["chat"])
 
-def load_faiss_index_for_pdf(file_name: str, top_k: int):
-    """
-    Given a PDF filename (e.g. "test_pdf.pdf") and desired top_k,
-    load the FAISS index from faiss_db/pdf_index/<pdf_name_without_ext> and
-    return a retriever configured with that index.
-    """
-    pdf_key = os.path.splitext(file_name)[0]  # "test_pdf"
-    faiss_folder = os.path.join(settings.FAISS_PDF_PATH, pdf_key)
-
+def load_faiss_index_for_project(project_id: str, top_k: int):
+    faiss_folder = os.path.join(settings.FAISS_PDF_PATH, project_id)
     if not os.path.isdir(faiss_folder):
         raise HTTPException(
             status_code=404,
-            detail=f"No FAISS index found for '{file_name}'. Did you upload it?"
+            detail=f"No FAISS index found for project'{project_id}'."
         )
-
     try:
         vectorstore = FAISS.load_local(
             folder_path=faiss_folder,
@@ -43,35 +35,18 @@ def load_faiss_index_for_pdf(file_name: str, top_k: int):
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to load FAISS for '{file_name}': {e}"
+            detail=f"Failed to load FAISS for project '{project_id}': {e}"
         )
-
-    # Return a simple FAISS retriever (no metadata filtering needed, since one‐index per PDF)
+    # Return a FAISS retriever that searches all files in the project (no file-level filtering)
     return vectorstore.as_retriever(search_kwargs={"k": top_k})
 
 #TODO:
 # Make this route for active users only
 @router.post("/query", response_model=ChatResponse)
 async def chat_with_pdf(body: ChatQuery, current_user=Depends(get_current_user)):
-    """
-    POST /chat/query
-    {
-      "question": "What does page 2 say?",
-      "history": [ ["Hi", "Hello!"] ],
-      "file_name": "test_pdf.pdf",
-      "top_k": 4
-    }
-
-    Returns:
-    {
-      "answer": "<LLM’s response>",
-      "sources": ["[Page 2]", "[Page 1]"],
-      "updated_history": [ [...], [question, answer] ]
-    }
-    """
     # Load a retriever for the requested PDF
-    retriever = load_faiss_index_for_pdf(
-        file_name=body.file_name,
+    retriever = load_faiss_index_for_project(
+        project_id=body.project_id,
         top_k=body.top_k or 4
     )
 
@@ -90,11 +65,9 @@ async def chat_with_pdf(body: ChatQuery, current_user=Depends(get_current_user))
 
     answer = result["answer"]
     source_docs = result.get("source_documents", [])
-
-    # Collect “sources” as simple “[Page x]” tags
     sources = []
     for doc in source_docs:
-        meta = doc.metadata  # e.g. {"page": 2, "file_name": "test_pdf.pdf"}
+        meta = doc.metadata  
         page = meta.get("page")
         if page is not None and page not in sources:
             sources.append(f"[Page {page}]")

@@ -51,10 +51,11 @@ class FileUploadResponse(BaseModel):
 class ChatQuery(BaseModel):
     question: str
     history: List[Tuple[str, str]] = []
-    file_name: str # e.g. [("Hello", "Hi! How can I help?"), ...]
+    file_name: List[str] 
     top_k: int = 4  # how many docs to retrieve
+    project_id: str
 
 class ChatResponse(BaseModel):
     answer: str
-    sources: List[str]           # e.g. ["[File: xyz.pdf, Page 3]", …]
+    sources: List[str]           
     updated_history: List[Tuple[str, str]]

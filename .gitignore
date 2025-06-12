@@ -9,7 +9,8 @@ faiss_db
 
 *.pyc
 */__pycache__/
-__pycache__
+__pycache__/
+*.py[cod]
 
 *.pdf
 *.csv
