@@ -30,6 +30,7 @@ async def upload_document(
 
     await file.seek(0)
     file_content_bytes = await file.read()
+
     #TODO:
     # 1) Upload to S3 (if desired—mirrors Streamlit’s behavior)
     # s3 = boto3.client(
@@ -43,13 +44,11 @@ async def upload_document(
     #     s3.upload_fileobj(await file.read(), settings.BUCKET_NAME, file.filename)
     # except BotoCoreError as e:
     #     raise HTTPException(status_code=500, detail=f"S3 upload failed: {e}")
-
-    # 2) Rewind file to pass to ingestion function
-    await file.seek(0)
+    
 
     # 3) Call the existing ingestion routines
     if filename.endswith(".pdf"):
-        result = handle_pdf(project_id, file_bytes=file_content_bytes, file_name=file.filename)
+        result = handle_pdf(project_id, file_content_bytes, file_name=file.filename)
     else:
         result = handle_csv(project_id, file, file_name=file.filename)
 

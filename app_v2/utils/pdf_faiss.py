@@ -81,7 +81,7 @@ def handle_pdf(project_id, file_bytes: Union[bytes, io.BytesIO], file_name: str)
 
     # Extract and chunk
     try:
-        raw_text_with_metadata = pdf_read_2(file_name, pdf_stream)
+        raw_text_with_metadata = pdf_read_2(pdf_stream, file_name)
     except Exception as e:
         logger.error(f"[handle_pdf] PDF parsing failed: {e}")
         raise
