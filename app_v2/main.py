@@ -3,8 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app_v2.api import auth as auth_router
 from app_v2.api import chat as chat_router
+from app_v2.api import user_views as user_router
 from app_v2.api import documents as docs_router
-from app_v2.database import init_db
+from app_v2.init_db import init_db
 
 app = FastAPI(
     title="RAG Chatbot Backend with JWT Auth",
@@ -24,6 +25,7 @@ app.add_middleware(
 # ----------- Include Routers -----------
 app.include_router(auth_router.router, prefix="/auth")
 app.include_router(chat_router.router, prefix="/chat")
+app.include_router(user_router.router, prefix="/user")
 app.include_router(docs_router.router, prefix="/documents")
 
 

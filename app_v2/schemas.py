@@ -3,7 +3,14 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Tuple, Any
 
 
-# ----- Data returned when a user is create, updated or fetched -----
+class ProjectBase(BaseModel):
+    project_id: int
+    name: str
+    description: str
+
+    class Config:
+        orm_mode = True
+
 
 class UserCreate(BaseModel):
     """
@@ -50,18 +57,11 @@ class UserOut(BaseModel):
     state: Optional[str]
     country: Optional[str]
     zipcode: Optional[str]
+
+    projects: List[ProjectBase] = []
     
     class Config:
         orm_mode = True  # tell Pydantic to read data from ORM model
-
-
-class ProjectBase(BaseModel):
-    project_id: int
-    name: str
-    description: str
-
-    class Config:
-        orm_mode = True
 
 
 class UserOutProjects(BaseModel):

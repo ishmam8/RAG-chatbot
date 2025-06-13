@@ -1,9 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import app_v2.models  
 
-from .config import settings
+from app_v2.config import settings
 
 # Create the SQLAlchemy engine (connect to SQLite)
 engine = create_engine(settings.SQLALCHEMY_DATABASE_URL)
@@ -18,10 +17,3 @@ SessionLocal = sessionmaker(
 # Base class for ORM models
 Base = declarative_base()
 
-
-def init_db():
-    """
-    Import all ORM models here, then create tables.
-    Call this at app startup to ensure the DB and tables exist.
-    """
-    Base.metadata.create_all(bind=engine)

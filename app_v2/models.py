@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Table, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from .database import Base
+from app_v2.database import Base 
 
 user_project = Table(
     "user_project",
@@ -18,6 +18,7 @@ class User(Base):
   name = Column(String, nullable=False)
   hashed_password = Column(String, nullable=False)
   is_active = Column(Boolean, default=True, nullable=False)
+  is_admin = Column(Boolean, default=False, nullable=False)
   created_at = Column(DateTime(timezone=True), server_default=func.now())
 
   pic = Column(String, nullable=True)

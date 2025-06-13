@@ -100,8 +100,8 @@ def get_current_user(
     """
     Verifies the *access token*. Doesn’t accept a refresh token here.
     """
-    username = decode_token(token, check_scope=None)  # scope=None means “any token with sub=...”
-    user = db.query(models.User).filter(models.User.email == username).first()
+    email = decode_token(token, check_scope=None)  # scope=None means “any token with sub=...”
+    user = db.query(models.User).filter(models.User.email == email).first()
     if user is None or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
