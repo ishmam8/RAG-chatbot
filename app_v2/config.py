@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     
 
     # ============ Database Settings =====================
-    SQLALCHEMY_DATABASE_URL: str = "sqlite:///./users.db"
+    SQLALCHEMY_DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/ragbotdb"
 
 
     # ============ LLM And VectorStore Settings ============

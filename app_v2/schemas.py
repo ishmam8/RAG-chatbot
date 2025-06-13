@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Tuple, Any
 
 
-# ----- Data returned when a user is created or fetched -----
+# ----- Data returned when a user is create, updated or fetched -----
 
 class UserCreate(BaseModel):
     """
@@ -11,25 +11,64 @@ class UserCreate(BaseModel):
     """
     email: EmailStr
     name: str
-    password: str
+    password: str  # plaintext (to be hashed later)
+    pic: Optional[str] = None
+    company: Optional[str] = None
+    dark_mode: Optional[bool] = False
+    role: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zipcode: Optional[str] = None
+
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    pic: Optional[str] = None
+    company: Optional[str] = None
+    dark_mode: Optional[bool] = None
+    role: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zipcode: Optional[str] = None
 
 
 class UserOut(BaseModel):
-    """
-    Fields we return in response (never send hashed_password).
-    """
-    id: int
     email: EmailStr
     name: str
     is_active: bool
     created_at: datetime
-
+    pic: Optional[str]
+    company: Optional[str]
+    dark_mode: bool
+    role: Optional[str]
+    address: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    country: Optional[str]
+    zipcode: Optional[str]
+    
     class Config:
         orm_mode = True  # tell Pydantic to read data from ORM model
 
 
-# ----- Token schemas -----
+class ProjectBase(BaseModel):
+    project_id: int
+    name: str
+    description: str
 
+    class Config:
+        orm_mode = True
+
+
+class UserOutProjects(BaseModel):
+    projects: List[ProjectBase] = []
+
+
+# ----- Token schemas -----
 class Token(BaseModel):
     access_token: str
     token_type: str  # always "bearer"
@@ -44,10 +83,12 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+# Document Upload
 class FileUploadResponse(BaseModel):
     detail: str
     project_id: str
 
+# Chat Schemas
 class ChatQuery(BaseModel):
     question: str
     history: List[Tuple[str, str]] = []
