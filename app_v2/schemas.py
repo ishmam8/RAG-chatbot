@@ -92,7 +92,7 @@ class FileUploadResponse(BaseModel):
 class ChatQuery(BaseModel):
     question: str
     history: List[Tuple[str, str]] = []
-    file_name: List[str] 
+    file_name: Optional[List[str]] = None
     top_k: int = 4  # how many docs to retrieve
     project_id: str
 
