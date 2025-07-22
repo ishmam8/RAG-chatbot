@@ -1,1 +1,17 @@
 .env
+venv
+
+*.pdf
+*.csv
+
+rag_chatbot.pem
+faiss_db
+
+*.pyc
+*/__pycache__/
+__pycache__/
+*.py[cod]
+
+*.pdf
+*.csv
+test_data.py
