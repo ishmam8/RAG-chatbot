@@ -18,10 +18,10 @@ A **Retrieval-Augmented Generation chatbot** using LangChain, OpenAI GPT-4.5, an
 ## Main Technologies
 
 - **Python 3.9+**
+- **FastAPI ASGI (Uvicorn)**: Runs the API server
 - **LangChain**: Handles RAG logic
 - **OpenAI GPT-4.5**: Large Language Model
 - **FAISS**: Fast vector search
-- **ASGI (Uvicorn)**: Runs the API server
 - **Supervisor**: Keeps the server running on AWS Ubuntu
 
 ---
